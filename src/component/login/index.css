@@ -1,0 +1,4 @@
+.drop-shadow{
+    -webkit-filter: drop-shadow(7px 7px 7px  rgba(0.3, 0, 0, 0.3));
+    filter: drop-shadow( -3px 6px 7px  rgba(0.3, 0.3, 0.3, 0.3))
+}

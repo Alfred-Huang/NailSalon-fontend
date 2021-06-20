@@ -1,0 +1,42 @@
+
+.appointment-card::-webkit-scrollbar{
+    display: none;
+}
+
+.appointment-card{
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+
+
+
+.product-card::-webkit-scrollbar{
+    display: none;
+}
+
+.product-card{
+    width: 300px;
+    height: 300px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+
+
+.employee-card::-webkit-scrollbar{
+    display: none;
+}
+
+.employee-card{
+    width: 300px;
+    height: 377px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
