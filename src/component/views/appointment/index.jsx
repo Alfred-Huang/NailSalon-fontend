@@ -1,8 +1,15 @@
 import React, {Component, Fragment} from 'react';
-import {Space,Card, Modal, Calendar, List, Row, Col, Table, Tag} from "antd";
+import {Button,Select, Space, Card, Modal, Calendar, List, Row, Col, Table, Tag, Form, Input, InputNumber} from "antd";
 import moment from 'moment';
+const { Option } = Select;
+const children = [];
+for (let i = 10; i < 36; i++) {
+    children.push(<Option key={i.toString(36) + i}>{i.toString(36) + i}</Option>);
+}
 
-
+function handleChange(value) {
+    console.log(`selected ${value}`);
+}
 const columns = [
     {
         title: 'Name',
@@ -162,7 +169,53 @@ class Appointment extends Component {
                     <Calendar  onSelect={this.onSelect} />
                 </Card>
                 <Modal width={1000}  title="Appointment Table" visible={this.state.isModalVisible} onOk={this.handleOk} onCancel={this.handleCancel}>
-                    <Table pagination={false} scroll={{y: 300}} columns={columns} dataSource={data2} />
+                    <Form
+                        size={"small"}
+                        layout={"inline"}
+                        style={{marginLeft: 90}}
+                    >
+                        <Form.Item label="Name">
+                            <Input />
+                        </Form.Item>
+                        <Form.Item label="Service">
+                            <Select
+                                mode="multiple"
+                                allowClear
+                                style={{ width: 300 }}
+                                placeholder="Please select"
+                                defaultValue={['a10', 'c12']}
+                                onChange={handleChange}
+                            >
+                                {children}
+                            </Select>
+                        </Form.Item>
+                        <Form.Item label="people">
+                            <InputNumber />
+                        </Form.Item>
+                        <Form.Item style={{marginTop: 10}} label="Employee">
+                            <Select
+                                mode="multiple"
+                                allowClear
+                                style={{ width: 300 }}
+                                placeholder="Please select"
+                                defaultValue={['a10', 'c12']}
+                                onChange={handleChange}
+                            >
+                                {children}
+                            </Select>
+                        </Form.Item>
+                        <Form.Item style={{marginTop: 10}} label="Time">
+                           <Input/>
+                        </Form.Item>
+                        <Form.Item style={{marginTop: 10}}>
+                            <Button type="primary" htmlType="submit">
+                                Add
+                            </Button>
+                        </Form.Item>
+                    </Form>
+                    <div style={{marginTop: 10}}>
+                        <Table  pagination={false} scroll={{y: 300}} columns={columns} dataSource={data2} />
+                    </div>
                 </Modal>
             </Fragment>
         );
