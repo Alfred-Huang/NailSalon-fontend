@@ -23,7 +23,7 @@ class Dashboard extends Component {
     render() {
         return (
             <Fragment>
-                <Row style={{marginTop: 40}}>
+                <Row style={{marginTop: 50}}>
                     <Col offset={1}>
                         <Card hoverable={true} style={{width: "calc(100vw * 0.5 - 30)"}} title={"Daily Summary"} headStyle={{height: 30, textAlign: "center"}}>
                             <div  style={{width: "calc(100vw * 0.4)", height: 350}}>

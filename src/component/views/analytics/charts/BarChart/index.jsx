@@ -1,6 +1,6 @@
 import React, {Component, Fragment} from 'react';
 import {Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts";
-import dailyData from "../../../../mock/dailySummary";
+import dailyData from "../../../../../mock/dailySummary";
 
 class MyBarChart extends Component {
 

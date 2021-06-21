@@ -10,7 +10,6 @@ class LayoutContent extends Component {
     }
 
     shouldComponentUpdate(nextProps, nextState, nextContext) {
-        console.log("66666666666666666")
         return nextProps.history.location.pathname !== this.state.path
     }
 

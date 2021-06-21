@@ -11,16 +11,9 @@ const menuList = [
         icon: "home"
     },
     {
-        title: "Finance",
-        path: "/finance",
-        icon: "dd",
-        children: [
-            {
-                title: "Summary",
-                path: "/finance/summary"
-            }
-        ]
-
+        title: "Analytics",
+        path: "/analytics",
+        icon: "dd"
     },
     {
         title: "Product",
