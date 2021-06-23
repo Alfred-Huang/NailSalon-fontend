@@ -41,14 +41,14 @@ class Setting extends Component {
                                     dataSource={data}
                                     renderItem=
                                         {item =>
-                                        <List.Item>
-                                            <div>
-                                                {item}
-                                            </div>
-                                            <div style={{textAlign: "right"}}>
-                                                <Button style={{marginLeft: 40}}>as</Button>
-                                            </div>
-                                        </List.Item>
+                                            <List.Item>
+                                                <div>
+                                                    {item}
+                                                </div>
+                                                <div style={{textAlign: "right"}}>
+                                                    <Button style={{marginLeft: 40}}>as</Button>
+                                                </div>
+                                            </List.Item>
                                         }
                                 />
                             </div>

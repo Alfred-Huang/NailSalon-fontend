@@ -11,6 +11,11 @@ const menuList = [
         icon: "home"
     },
     {
+        title: "Sale",
+        path: "/sale",
+        icon: "home"
+    },
+    {
         title: "Analytics",
         path: "/analytics",
         icon: "dd"
@@ -23,32 +28,20 @@ const menuList = [
             {
                 title: "Products",
                 path: "/product/products"
-            }
-        ],
-    },
-    {
-        title: "Summary",
-        path: "/summary",
-        icon: "home",
-    },
-    {
-        title: "Record",
-        path: "/record",
-        children: [
-            {
-                title: "Payment",
-                path: "/record/payment"
             },
             {
                 title: "Setting",
-                path: "/record/setting"
+                path: "/product/setting"
             }
         ]
     },
     {
         title: "Manage",
-        path: "/manage"
+        path: "/manage",
+    },
+    {
+        title: "Setting",
+        path: "/setting"
     }
-
 ];
 export default menuList;

@@ -19,16 +19,16 @@ class Products extends Component {
     render() {
         return (
             <Fragment>
-                <Row style={{marginTop: 30}}>
+                <Row style={{marginTop: 50}}>
                     <Col offset={1}>
-                        <Card style={{width: "calc(100vw - 350px)"}}>
+                        <Card style={{width: "calc(100vw - 440px)"}}>
                             <Input style={{width: 200}} placeholder="Search brand or number" />
                         </Card>
                     </Col>
                 </Row>
                 <Row style={{marginTop: 5}}>
                     <Col offset={1}>
-                        <div style={{width: "calc(100vw - 350px)", height: 40, display: "inline-block", backgroundColor: "white", textAlign: "center"}}>
+                        <div style={{width: "calc(100vw - 440px)", height: 40, display: "inline-block", backgroundColor: "white", textAlign: "center"}}>
                             {tagsData.map(tag => (
                                 <CheckableTag
                                     key={tag}

@@ -11,11 +11,10 @@ function onChange(date, dateString) {
 function handleChange(value) {
     console.log(`selected ${value}`);
 }
-class FinanceAnalytics extends Component {
+class EarningAnalytics extends Component {
     render() {
         return (
             <Fragment>
-                <Row style={{marginTop: 50, marginLeft: 130}}>
                     <Col>
                         <Row>
                             <Col>
@@ -59,10 +58,9 @@ class FinanceAnalytics extends Component {
                             </div>
                         </Card>
                     </Col>
-                </Row>
             </Fragment>
         );
     }
 }
 
-export default FinanceAnalytics;
+export default EarningAnalytics;
