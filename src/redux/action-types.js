@@ -1,1 +1,1 @@
-export const USER_TOKEN = "USER_TOKEN"
+export const ADD_SALE_RECORD = "ADD_SALE_RECORD"

@@ -1,15 +1,18 @@
 import React, {Component, Fragment} from 'react';
 import {Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts";
-import dailyData from "../../../../../mock/dailySummary";
+import data from "../../../../../mock/dailySummary";
 
 class MyBarChart extends Component {
+
+    componentDidMount() {
+    }
 
     barChartDisplay = () =>{
         return <ResponsiveContainer width="100%" height="100%">
             <BarChart
                 width={ 500}
                 height={ 350}
-                data={dailyData}
+                data={data}
                 margin={{
                     top: 5,
                     right: 30,
@@ -18,11 +21,11 @@ class MyBarChart extends Component {
                 }}
             >
                 <CartesianGrid strokeDasharray="3 1" />
-                <XAxis dataKey="name" />
+                <XAxis dataKey="time" />
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="pv" fill="#8884d8" />
+                <Bar dataKey="value" fill="#8884d8" />
             </BarChart>
         </ResponsiveContainer>
     }
