@@ -16,31 +16,39 @@ function handleChange(value) {
 
 const columns = [
     {
-        title: 'Name',
-        dataIndex: 'name',
-        key: 'name',
-        render: text => <a>{text}</a>,
+        title: 'id',
+        dataIndex: 'id',
+        key: 'id',
     },
     {
-        title: 'Age',
-        dataIndex: 'age',
-        key: 'age',
+        title: 'services',
+        dataIndex: 'services',
+        key: 'services',
     },
     {
-        title: 'Address',
-        dataIndex: 'address',
-        key: 'address',
+        title: 'stuffs',
+        dataIndex: 'stuffs',
+        key: 'stuffs',
     },
     {
-        title: 'Action',
-        key: 'action',
+        title: 'date',
+        dataIndex: 'date',
+        key: 'date',
+    },
+    {
+        title: 'time',
+        dataIndex: 'time',
+        key: 'time',
+    },
+    {
+        title: 'action',
         render: (text, record) => (
             <Space size="middle">
                 <a>Invite {record.name}</a>
                 <a>Delete</a>
             </Space>
         ),
-    },
+    }
 ];
 
 const data = [
@@ -61,13 +69,25 @@ class Sale extends Component {
         totalPrice: 0,
     }
 
+    componentDidMount() {
+        this.setState({data: moment().format("YYYY/MM/DD")})
+    }
+
     onSearch  = () =>{
 
     }
 
+
     onFinish = ()=>{
         let id = uuidv4()
-        const saleRecord = {id: id, employees: this.state.employees, services: this.state.services, priceList: this.state.priceList, totalPrice: this.state.totalPrice}
+        const saleRecord = {
+            id: id, employees: this.state.employees,
+            services: this.state.services,
+            priceList: this.state.priceList,
+            totalPrice: this.state.totalPrice,
+            date: this.state.date,
+            time: moment().format("HH:mm")
+        }
 
     }
     handleTotalPrice = (value) =>[
@@ -132,10 +152,10 @@ class Sale extends Component {
     render() {
         return (
             <Fragment>
-                <Row style={{marginLeft: 150, marginTop: 50}}>
+                <Row justify={"center"} style={{ marginTop: 50}}>
                     <Col>
                         <Card
-                            style={{width: "calc(100vw * 0.3)"}}
+                            style={{width: "calc(100vw * 0.5)"}}
                         >
                             <p style={{marginRight: 30, marginBottom: 5}}>Date:</p>
                             <DatePicker onChange={this.handleDatePicker} style={{width: 200}} value={moment(moment().format())} format={dateFormat} />
@@ -192,11 +212,13 @@ class Sale extends Component {
                             <Divider/>
                         </Card>
                     </Col>
+                </Row>
+                <Row justify={"center"} style={{marginTop: 10}}>
                     <Col>
                         <Card
-                            style={{width: 750}}
+                            style={{width: 1400}}
                             extra={
-                                <Search placeholder="input search text" onSearch={this.onSearch()} style={{ width: 200 }} />
+                                <Search placeholder="input search text" onSearch={this.onSearch()} style={{ width: 400 }} />
                             }
                             headStyle={{alignItems: "left"}}
                         >

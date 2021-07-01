@@ -1,12 +1,34 @@
 import React, {Component, Fragment} from 'react';
-import{Row, Col, Button, Card, Form, Input, List} from "antd";
+import {Row, Col, Button, Card, Form, Input, List, Table, Space} from "antd";
 
 const data = [
-    'Racing car sprays burning fuel into crowd.',
-    'Japanese princess to wed commoner.',
-    'Australian walks 100km after outback crash.',
-    'Man charged over missing wedding girl.',
-    'Los Angeles battles huge wildfires.',
+    {service: "cao", price: 20},
+    {service: "cao", price: 20},
+    {service: "cao", price: 20},
+    {service: "cao", price: 20}
+];
+
+
+const columns = [
+    {
+        title: 'service',
+        dataIndex: 'service',
+        key: 'service',
+    },
+    {
+        title: 'price',
+        dataIndex: 'price',
+        key: 'price',
+    },
+    {
+        title: 'action',
+        render: (text, record) => (
+            <Space size="middle">
+                <a>Edit</a>
+                <a>Delete</a>
+            </Space>
+        ),
+    }
 ];
 
 class Setting extends Component {
@@ -36,21 +58,7 @@ class Setting extends Component {
                                 </Form.Item>
                             </Form>
                             <div style={{marginTop: 30}}>
-                                <List
-                                    bordered
-                                    dataSource={data}
-                                    renderItem=
-                                        {item =>
-                                            <List.Item>
-                                                <div>
-                                                    {item}
-                                                </div>
-                                                <div style={{textAlign: "right"}}>
-                                                    <Button style={{marginLeft: 40}}>as</Button>
-                                                </div>
-                                            </List.Item>
-                                        }
-                                />
+                               <Table  style={{marginTop: 10}} pagination={false} scroll={{y: 300}} columns={columns} dataSource={data} />
                             </div>
                         </Card>
                     </Col>
