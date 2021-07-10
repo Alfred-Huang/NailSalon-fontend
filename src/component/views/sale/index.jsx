@@ -1,14 +1,33 @@
 import React, {Component, Fragment} from 'react';
-import {Tag, Space, Table, Button, DatePicker, Col, Card, Row, Divider, Form, Input, InputNumber, Select} from "antd";
+import {
+    Tag,
+    Space,
+    Table,
+    Button,
+    DatePicker,
+    Col,
+    Card,
+    Row,
+    Divider,
+    Form,
+    Input,
+    InputNumber,
+    Select,
+    message
+} from "antd";
 import moment from 'moment';
 import {v4 as uuidv4} from "uuid";
+import axios from "axios";
+import server from "../../../config/config";
+import employee from "../../../redux/reducers/employee";
+import {connect} from "react-redux";
 const { Option } = Select;
 const { Search } = Input;
+
+
+
 const dateFormat = 'YYYY/MM/DD';
-const children = [];
-for (let i = 10; i < 36; i++) {
-    children.push(<Option key={i.toString(36) + i}>{i.toString(36) + i}</Option>);
-}
+
 function handleChange(value) {
     console.log(`selected ${value}`);
 }
@@ -70,7 +89,8 @@ class Sale extends Component {
     }
 
     componentDidMount() {
-        this.setState({data: moment().format("YYYY/MM/DD")})
+        this.setState({date: moment().format("YYYY/MM/DD")})
+
     }
 
     onSearch  = () =>{
@@ -81,15 +101,29 @@ class Sale extends Component {
     onFinish = ()=>{
         let id = uuidv4()
         const saleRecord = {
-            id: id, employees: this.state.employees,
+            saleId: id, employees: this.state.employees,
             services: this.state.services,
             priceList: this.state.priceList,
             totalPrice: this.state.totalPrice,
             date: this.state.date,
             time: moment().format("HH:mm")
         }
-
+        let api = server.IP + "/sale/addSaleRecord";
+        axios.post(api, {saleRecord}).then((result)=>{
+           this.success()
+        }).catch(()=>{
+            this.error()
+        })
     }
+
+    success = () => {
+        message.success('Success');
+    }
+
+    error = () => {
+        message.error('Fail');
+    };
+
     handleTotalPrice = (value) =>[
         this.setState({totalPrice: value})
     ]
@@ -150,6 +184,10 @@ class Sale extends Component {
     }
 
     render() {
+        const children = [];
+        for (let i = 0; i < this.props.employeeList.length; i++) {
+            children.push(<Option key={this.props.employeeList[i].employeeId}>{this.props.employeeList[i].name}</Option>);
+        }
         return (
             <Fragment>
                 <Row justify={"center"} style={{ marginTop: 50}}>
@@ -231,4 +269,4 @@ class Sale extends Component {
     }
 }
 
-export default Sale;
+export default connect(state =>({employeeList: state.employeeList}))(Sale);

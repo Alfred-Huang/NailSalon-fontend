@@ -1,6 +1,24 @@
 import React, {Component, Fragment} from 'react';
-import {Table, List, Col, Card, Row, Button, Calendar, Space, Modal, Form, Input, Select, InputNumber} from "antd";
+import {
+    Table,
+    List,
+    Col,
+    Card,
+    Row,
+    Button,
+    Calendar,
+    Space,
+    Modal,
+    Form,
+    Input,
+    Select,
+    message
+} from "antd";
+import AddingEmployeeTable from "./AddingEmployeeTable";
 import {v4 as uuidv4} from "uuid";
+
+import server from "../../../config/config";
+import axios from "axios";
 const { Option } = Select;
 const data = []
 
@@ -32,31 +50,74 @@ class Manage extends Component {
 
     state = {
         isModalVisible: false,
+        isAddModalVisible: false,
         employeeList: [],
+        date: ""
     }
 
-    componentDidMount() {
-        console.log(uuidv4())
-    }
     handleServiceSelector = (value) =>{
         this.setState({employeeList: value})
     }
-    onSelect = () =>{
-        this.setState({isModalVisible: true}, ()=>{
 
-        })
+    onSelect = (value) =>{
+        const date = value.format("YYYY/MM/DD")
+        this.setState({isModalVisible: true, date: date})
     }
 
     handleSet = ()=>{
+        let employee = "";
+        for(let i = 0; i < this.state.employeeList.length; i++){
+            employee += this.state.employeeList[i];
+            if(i !== this.state.employeeList.length - 1){
+                employee += " ";
+            }
+        }
+        const schedule = {date: this.state.date, employee: employee};
+        let api = server.IP + "/manage/addSchedule";
+        axios.post(api, {schedule}).then((result)=>{
+           this.success()
+        }).catch(()=>{
+            this.error()
+        })
+    }
+
+    handleOk = ()=>{
+        this.setState({isModalVisible: false})
+    }
+
+    handleCancel = ()=>{
+        this.setState({isModalVisible: false})
+    }
+
+    handleAdd = ()=>{
+        this.setState({isAddModalVisible: true})
+    }
+
+    handleAddOk = () =>{
+        this.setState({isAddModalVisible: false})
+    }
+
+    handleAddCancel = ()=>{
+        this.setState({isAddModalVisible: false})
+    }
+
+    handleAddEmployee = ()=>{
 
     }
 
+    success = () => {
+        message.success('Success');
+    }
+
+    error = () => {
+        message.error('Fail');
+    };
 
     render() {
         const list = []
         const children = []
         for (let i = 10; i < 36; i++) {
-            children.push(<Option key={i.toString(36) + i} value={uuidv4()} >{i.toString(36) + i}</Option>);
+            children.push(<Option key={i.toString(36) + i} value={i.toString(36) + i} >{i.toString(36) + i}</Option>);
         }
         return (
             <Fragment>
@@ -67,15 +128,18 @@ class Manage extends Component {
                             title={"Employee Manage"}
                             extra={
                                 <div style={{textAlign: "right"}}>
-                                    <Button type="primary" style={{marginLeft: 40}}>add</Button>
+                                    <Button type="primary" style={{marginLeft: 40}} onClick={this.handleAdd}>add</Button>
                                 </div>
                             }
                         >
                             <Table columns={columns} dataSource={data} />
                         </Card>
+                        <Modal width={1000}  title="Employee" visible={this.state.isAddModalVisible} onOk={this.handleAddOk} onCancel={this.handleAddCancel}>
+                            <AddingEmployeeTable/>
+                        </Modal>
                     </Col>
                     <Col offset={1}>
-                        <Calendar mode="month" style={{width: "calc(100vw * 0.45)"}} onSelect={this.onSelect}/>
+                        <Calendar mode="month" style={{width: "calc(100vw * 0.45)"}} onChange={this.onSelect}/>
                     </Col>
                     <Modal width={1000}  title="Employee Schedule" visible={this.state.isModalVisible} onOk={this.handleOk} onCancel={this.handleCancel}>
                         <div style={{marginTop: 10, textAlign: "center"}}>

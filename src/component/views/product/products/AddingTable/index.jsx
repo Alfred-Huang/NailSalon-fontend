@@ -1,17 +1,42 @@
 import React, {Component,Fragment} from 'react';
-import { Form, Input, Button, Space } from 'antd';
+import {Form, Input, Button, Space, message} from 'antd';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import server from "../../../../../config/config";
+import {v4 as uuidv4} from "uuid";
+import axios from "axios";
 
 class AddingTable extends Component {
+    success = () => {
+        message.success('Success');
+    }
+
+    error = () => {
+        message.error('Fail');
+    };
+
+
 
     onFinish = (values)=>{
-        console.log('Received values of form:', values);
+        console.log('Received values of form:', values.list);
+        const dataList = [];
+        for(let i = 0; i < values.list.length; i++){
+            const data = values.list[i];
+            dataList.push({productId: uuidv4(), ...data})
+        }
+        const productList = [...dataList];
+        let api = server.IP + "/product/addProduct"
+        console.log(productList)
+        axios.post(api, {productList}).then((result)=>{
+            this.success()
+        }).catch(()=>{
+            this.error()
+        })
     }
     render() {
         return (
             <Fragment>
                 <Form name="dynamic_form_nest_item" onFinish={this.onFinish} autoComplete="on">
-                <Form.List name="users" initialValue={[1]} >
+                <Form.List name="list" initialValue={[1]} >
                 {(fields, { add, remove }) => (
                     <>
                         {fields.map(({ key, name, fieldKey, ...restField }) => (

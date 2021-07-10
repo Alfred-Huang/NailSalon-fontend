@@ -1,4 +1,7 @@
-global.AppConfig = {
+
+
+const server = {
     //serverIP for spring boot
-    serverIP:'http://localhost:8080'
+    IP: "http://localhost:8080"
 }
+export default server;

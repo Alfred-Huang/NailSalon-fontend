@@ -1,15 +1,31 @@
 import React, {Component, Fragment} from 'react';
-import {Button,Select, Space, Card, Modal, Calendar, List, Row, Col, Table, Tag, Form, Input, InputNumber} from "antd";
+import {
+    Button,
+    Select,
+    Space,
+    Card,
+    Modal,
+    Calendar,
+    List,
+    Row,
+    Col,
+    Table,
+    Tag,
+    Form,
+    Input,
+    InputNumber,
+    message
+} from "antd";
 import moment from 'moment';
+import server from "../../../config/config";
+import {v4 as uuidv4} from "uuid";
+import axios from "axios";
 const { Option } = Select;
 const children = [];
 for (let i = 10; i < 36; i++) {
     children.push(<Option key={i.toString(36) + i}>{i.toString(36) + i}</Option>);
 }
 
-function handleChange(value) {
-    console.log(`selected ${value}`);
-}
 const columns = [
     {
         title: 'Name',
@@ -141,9 +157,12 @@ const data2 = [
 
 
 class Appointment extends Component {
-
+    formRef = React.createRef();
     state = {
         isModalVisible: false,
+        services: [],
+        employees:[],
+        date: ""
     }
 
     handleOk = ()=>{
@@ -155,10 +174,51 @@ class Appointment extends Component {
     }
 
     onSelect = (value) =>{
-        const date = value.format("YYYY-MM-DD")
-        this.setState({isModalVisible: true}, ()=>{
+        const date = value.format("YYYY/MM/DD")
+        this.setState({isModalVisible: true, date: date})
+    }
+    success = () => {
+        message.success('Success');
+    }
 
+    error = () => {
+        message.error('Fail');
+    };
+
+    onFinish = (value)=> {
+
+        let employee = "";
+        for (let i = 0; i < value.employees.length; i++) {
+            employee += value.employees[i];
+            if(i !== value.services.length - 1){
+                employee += " "
+            }
+        }
+        let service = "";
+        for (let j = 0; j < value.services.length; j++) {
+            service += value.services[j];
+            if(j !== value.services.length - 1){
+                service += " "
+            }
+        }
+        console.log(employee)
+        const appointment = {
+            appointmentId: uuidv4(), customer: value.customer, service: service,
+            employee: employee, people: value.people, date: this.state.date, time: value.time
+        }
+        let api = server.IP + "/appointment/addAppointment";
+        axios.post(api, {appointment}).then((result) => {
+            this.success()
+            this.setState({  services: [], employees:[]})
+            this.reset();
+        }).catch(()=>{
+            this.error()
         })
+
+    }
+
+    reset = ()=>{
+        this.formRef.current.resetFields();
     }
 
 
@@ -173,38 +233,48 @@ class Appointment extends Component {
                         size={"small"}
                         layout={"inline"}
                         style={{marginLeft: 90}}
+                        onFinish={this.onFinish}
+                        ref={this.formRef}
                     >
-                        <Form.Item label="Name">
+                        <Form.Item
+                            label="Name"
+                            name="customer"
+                            rules={[{ required: true, message: 'Please enter name!'}]}
+                        >
                             <Input />
                         </Form.Item>
-                        <Form.Item label="Service">
+                        <Form.Item label="Services" name="services">
                             <Select
                                 mode="multiple"
                                 allowClear
                                 style={{ width: 300 }}
                                 placeholder="Please select"
-                                defaultValue={['a10', 'c12']}
-                                onChange={handleChange}
                             >
                                 {children}
                             </Select>
                         </Form.Item>
-                        <Form.Item label="people">
+                        <Form.Item
+                            label="people"
+                            name="people"
+                            rules={[{ required: true, message: 'Please input number of people!', pattern: new RegExp(/^[1-9]\d*$/, "g")}]}
+                        >
                             <InputNumber />
                         </Form.Item>
-                        <Form.Item style={{marginTop: 10}} label="Employee">
+                        <Form.Item style={{marginTop: 10}} label="Employee" name="employees">
                             <Select
                                 mode="multiple"
                                 allowClear
                                 style={{ width: 300 }}
                                 placeholder="Please select"
-                                defaultValue={['a10', 'c12']}
-                                onChange={handleChange}
                             >
                                 {children}
                             </Select>
                         </Form.Item>
-                        <Form.Item style={{marginTop: 10}} label="Time">
+                        <Form.Item
+                            style={{marginTop: 10}}
+                            label="Time" name="time"
+                            rules={[{ required: true, message: 'Please input hh : ss!', pattern: new RegExp(/^(?:[01]\d|2[0-3]):[0-5]\d$/, "y")}]}
+                        >
                            <Input/>
                         </Form.Item>
                         <Form.Item style={{marginTop: 10}}>

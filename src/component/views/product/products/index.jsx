@@ -41,7 +41,6 @@ class Products extends Component {
     }
 
     save = () => {
-        //处理校验值
         this.props.form.validateFields().then(values=>{
           console.log(values)
         })

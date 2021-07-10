@@ -1,1 +1,3 @@
 export const ADD_SALE_RECORD = "ADD_SALE_RECORD"
+export const ADD_EMPLOYEE = "ADD_EMPLOYEE"
+export const GET_EMPLOYEE = "GET_EMPLOYEE"
