@@ -19,35 +19,25 @@ import moment from 'moment';
 import {v4 as uuidv4} from "uuid";
 import axios from "axios";
 import server from "../../../config/config";
-import employee from "../../../redux/reducers/employee";
+import {addSaleRecord, setSaleRecord} from "../../../redux/action/index"
 import {connect} from "react-redux";
 const { Option } = Select;
 const { Search } = Input;
 
 
 
-const dateFormat = 'YYYY/MM/DD';
-
-function handleChange(value) {
-    console.log(`selected ${value}`);
-}
-
+const dateFormat = 'YYYY-MM-DD';
 
 const columns = [
-    {
-        title: 'id',
-        dataIndex: 'id',
-        key: 'id',
-    },
     {
         title: 'services',
         dataIndex: 'services',
         key: 'services',
     },
     {
-        title: 'stuffs',
-        dataIndex: 'stuffs',
-        key: 'stuffs',
+        title: 'employees',
+        dataIndex: 'employees',
+        key: 'employees',
     },
     {
         title: 'date',
@@ -60,37 +50,38 @@ const columns = [
         key: 'time',
     },
     {
-        title: 'action',
-        render: (text, record) => (
-            <Space size="middle">
-                <a>Invite {record.name}</a>
-                <a>Delete</a>
-            </Space>
-        ),
+        title: 'price',
+        dataIndex: 'price',
+        key: 'price',
     }
 ];
 
-const data = [
-    'Racing car sprays burning fuel into crowd.',
-    'Japanese princess to wed commoner.',
-    'Australian walks 100km after outback crash.',
-    'Man charged over missing wedding girl.',
-    'Los Angeles battles huge wildfires.',
-];
+
 class Sale extends Component {
-
-
     state = {
         employees: [],
         services:[],
         priceList:[],
+        employeeIdList:[],
+        serviceIdList:[],
         date: "",
+        searchDate: "",
         totalPrice: 0,
     }
 
     componentDidMount() {
-        this.setState({date: moment().format("YYYY/MM/DD")})
-
+        let date = moment().format("YYYY-MM-DD")
+        this.setState({
+                date: date,
+                searchDate: date
+            })
+        let api = server.IP + "/sale/getSaleRecord";
+        axios.get(api, {params:{ date: date}}).then((result)=>{
+            const record = {record: result.data}
+            this.props.setSaleRecord(record)
+        }).catch(()=>{
+            this.error()
+        })
     }
 
     onSearch  = () =>{
@@ -100,20 +91,46 @@ class Sale extends Component {
 
     onFinish = ()=>{
         let id = uuidv4()
+        let time = moment().format("HH:mm")
         const saleRecord = {
-            saleId: id, employees: this.state.employees,
+            saleId: id,
+            employees: this.state.employees,
+            employeeIdList: this.state.employeeIdList,
             services: this.state.services,
+            serviceIdList: this.state.serviceIdList,
             priceList: this.state.priceList,
             totalPrice: this.state.totalPrice,
             date: this.state.date,
-            time: moment().format("HH:mm")
+            time: time
         }
         let api = server.IP + "/sale/addSaleRecord";
         axios.post(api, {saleRecord}).then((result)=>{
-           this.success()
+            const services = this.convertToString(this.state.services)
+            const employees = this.convertToString(this.state.employees)
+           const newSaleRecord = {
+               sale_id: id,
+               employees: employees,
+               services: services,
+               price: this.state.totalPrice,
+               date: this.state.date,
+               time: time
+           }
+           this.props.addSaleRecord(newSaleRecord)
+            this.success()
         }).catch(()=>{
             this.error()
         })
+    }
+
+    convertToString = (arr) => {
+        let result  = ""
+        for(let i = 0; i < arr.length; i++){
+            result += arr[i]
+            if(i !== arr.length - 1){
+                result +=" "
+            }
+        }
+        return result
     }
 
     success = () => {
@@ -124,15 +141,37 @@ class Sale extends Component {
         message.error('Fail');
     };
 
-    handleTotalPrice = (value) =>[
+    handleTotalPrice = (value) =>{
+        console.log(value)
         this.setState({totalPrice: value})
-    ]
+    }
     handleDatePicker = (date, dateString) =>{
         this.setState({date: dateString})
     }
 
+    handleSaleDatePicker = (date, dateString) =>{
+        this.setState({searchDate: dateString},()=>{
+            let api = server.IP + "/sale/getSaleRecord";
+            axios.get(api, {params:{ date: dateString}}).then((result)=>{
+                const record = {record: result.data}
+                this.props.setSaleRecord(record)
+            }).catch((result)=>{
+                console.log(result)
+                this.error()
+            })
+        })
+    }
+
     handleServiceSelector = (value)=>{
-        this.setState({services: value})
+        let idList = [];
+        for(let i = 0; i < value.length; i++){
+            let serviceName = value[i]
+            let target = this.props.serviceList.list.filter((services)=>{
+                return services.service === serviceName
+            })
+            idList.push(target[0].serviceId)
+        }
+        this.setState({services: value, serviceIdList: idList})
     }
 
     handlePrice = (value, index) =>{
@@ -147,8 +186,17 @@ class Sale extends Component {
     }
 
     handleEmployeeSelector = (value)=>{
-        this.setState({employees: value})
+        let idList = [];
+        for(let i = 0; i < value.length; i++){
+            let name = value[i]
+            let target = this.props.employeeList.list.filter((employee)=>{
+                return employee.name === name
+            })
+            idList.push(target[0].employeeId)
+        }
+        this.setState({employees: value, employeeIdList: idList})
     }
+
 
     renderPriceList = ()=>{
         const len = this.state.employees.length
@@ -184,10 +232,18 @@ class Sale extends Component {
     }
 
     render() {
-        const children = [];
-        for (let i = 0; i < this.props.employeeList.length; i++) {
-            children.push(<Option key={this.props.employeeList[i].employeeId}>{this.props.employeeList[i].name}</Option>);
+        const employeeSelection = [];
+        const serviceSelection = [];
+        const data= this.props.saleRecord.record.map(item=>({key: item.sale_id, employees: item.employees, services: item.services, price: item.price, date: item.date, time: item.time}));
+        for (let i = 0; i < this.props.employeeList.list.length; i++) {
+            employeeSelection.push(<Option key={this.props.employeeList.list[i].name} >{this.props.employeeList.list[i].name}</Option>);
         }
+
+        for (let i = 0; i < this.props.serviceList.list.length; i++) {
+            serviceSelection.push(<Option key={this.props.serviceList.list[i].service}>{this.props.serviceList.list[i].service}</Option>);
+        }
+
+
         return (
             <Fragment>
                 <Row justify={"center"} style={{ marginTop: 50}}>
@@ -196,7 +252,7 @@ class Sale extends Component {
                             style={{width: "calc(100vw * 0.5)"}}
                         >
                             <p style={{marginRight: 30, marginBottom: 5}}>Date:</p>
-                            <DatePicker onChange={this.handleDatePicker} style={{width: 200}} value={moment(moment().format())} format={dateFormat} />
+                            <DatePicker onChange={this.handleDatePicker} style={{width: 200}} value={moment(this.state.date)} format={dateFormat} />
                             <Divider/>
                             <Row justify={"center"}>
                                    <Col span={20}>
@@ -208,7 +264,7 @@ class Sale extends Component {
                                            placeholder="Please select"
                                            onChange={this.handleServiceSelector}
                                        >
-                                           {children}
+                                           {serviceSelection}
                                        </Select>
                                    </Col>
                             </Row>
@@ -223,7 +279,7 @@ class Sale extends Component {
                                         placeholder="Please select"
                                         onChange={this.handleEmployeeSelector}
                                     >
-                                        {children}
+                                        {employeeSelection}
                                     </Select>
                                 </Col>
                             </Row>
@@ -256,9 +312,14 @@ class Sale extends Component {
                         <Card
                             style={{width: 1400}}
                             extra={
-                                <Search placeholder="input search text" onSearch={this.onSearch()} style={{ width: 400 }} />
+                                <div>
+                                    <Search placeholder="input search text" onSearch={this.onSearch()} style={{ width: 400, marginRight: 750 }} />
+                                    <DatePicker onChange={this.handleSaleDatePicker} style={{width: 200}} value={moment(this.state.searchDate)} format={dateFormat} />
+                                </div>
+
                             }
                             headStyle={{alignItems: "left"}}
+
                         >
                             <Table columns={columns} dataSource={data} />
                         </Card>
@@ -269,4 +330,7 @@ class Sale extends Component {
     }
 }
 
-export default connect(state =>({employeeList: state.employeeList}))(Sale);
+export default connect(
+    state =>({employeeList: state.employee, serviceList: state.service, saleRecord: state.sale}),
+    {setSaleRecord: setSaleRecord, addSaleRecord: addSaleRecord}
+    )(Sale);
