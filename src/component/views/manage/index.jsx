@@ -16,34 +16,14 @@ import {
 } from "antd";
 import AddingEmployeeTable from "./AddingEmployeeTable";
 import {v4 as uuidv4} from "uuid";
-
+import moment from 'moment';
 import server from "../../../config/config";
 import axios from "axios";
+import {connect} from "react-redux";
+import {addEmployee, deleteEmployee, setEmployee} from "../../../redux/action/employee";
+import {addSchedule, deleteSchedule, setSchedule} from "../../../redux/action/schedule";
 const { Option } = Select;
-const data = []
 
-
-
-const columns = [
-    {
-        title: 'id',
-        dataIndex: 'id',
-        key: 'id',
-    },
-    {
-        title: 'name',
-        dataIndex: 'name',
-        key: 'name',
-    },
-    {
-        title: 'action',
-        render: (text, record) => (
-            <Space size="middle">
-                <a>Delete</a>
-            </Space>
-        ),
-    }
-];
 
 
 class Manage extends Component {
@@ -52,16 +32,36 @@ class Manage extends Component {
         isModalVisible: false,
         isAddModalVisible: false,
         employeeList: [],
-        date: ""
+        date: "",
+        targetId: "",
+        employeeModal: false
     }
-
+    componentDidMount() {
+        let api = server.IP + "/manage/getEmployee"
+        axios.post(api).then((result)=>{
+            const list = {list: result.data}
+            this.props.setEmployee(list)
+        }).catch(()=>{
+            this.error()
+        })
+    }
     handleServiceSelector = (value) =>{
-        this.setState({employeeList: value})
+        this.setState({employeeList: value},()=>{
+            console.log(this.state.employeeList)
+        })
     }
 
     onSelect = (value) =>{
-        const date = value.format("YYYY/MM/DD")
-        this.setState({isModalVisible: true, date: date})
+        const date = value.format("YYYY-MM-DD")
+        this.setState({isModalVisible: true, date: date},()=>{
+            let api = server.IP + "/manage/getSchedule"
+            axios.post(api, {date}).then((result)=>{
+                let scheduleList = {list: result.data}
+                this.props.setSchedule(scheduleList)
+            }).catch(()=>{
+                this.error()
+            })
+        })
     }
 
     handleSet = ()=>{
@@ -73,9 +73,32 @@ class Manage extends Component {
             }
         }
         const schedule = {date: this.state.date, employee: employee};
-        let api = server.IP + "/manage/addSchedule";
-        axios.post(api, {schedule}).then((result)=>{
-           this.success()
+        if(this.props.schedule.list.length !== 0){
+            this.updateSchedule(employee)
+        }else{
+            let api = server.IP + "/manage/addSchedule";
+            axios.post(api, {schedule}).then((result)=>{
+                this.success()
+            }).catch(()=>{
+                this.error()
+            })
+        }
+    }
+
+    updateSchedule = (employee)=>{
+        console.log(employee)
+        employee += " ";
+        for(let i = 0; i < this.props.schedule.list.length; i++){
+            employee += this.props.schedule.list[i]
+            if(i !== this.props.schedule.list.length - 1){
+                employee += " ";
+            }
+        }
+        let data = {date: this.state.date, employee: employee}
+        let api = server.IP + "/manage/updateSchedule";
+        axios.post(api, {data}).then((result)=>{
+            this.props.addSchedule(this.state.employeeList);
+            this.success()
         }).catch(()=>{
             this.error()
         })
@@ -113,11 +136,96 @@ class Manage extends Component {
         message.error('Fail');
     };
 
+    handleEmployeeDelete = (targetId)=>{
+        this.setState({targetId: targetId, employeeModal: true})
+    }
+
+    handleEmployeeDeleteOk = () =>{
+        let api = server.IP + "/manage/deleteEmployee"
+
+        let id = this.state.targetId
+        axios.post(api, {id}).then((result)=>{
+            this.props.deleteEmployee(id)
+            this.success()
+        }).catch(()=>{
+            this.error()
+        })
+        this.setState({employeeModal: false})
+    }
+
+    handleScheduleDelete = (targetIndex)=>{
+        let newSchedule = this.props.schedule.list.filter((item, index)=>{
+            return index !== targetIndex;
+        })
+        let api = server.IP + "/manage/deleteSchedule"
+        let employee = ""
+        console.log(newSchedule)
+        for(let i = 0; i < newSchedule.length; i++){
+            employee += newSchedule[i]
+            if(i !== newSchedule.length - 1){
+                employee += " ";
+            }
+        }
+        let data = {date: this.state.date, employee: employee}
+        axios.post(api, {data}).then((result)=>{
+            this.props.deleteSchedule(newSchedule)
+            this.success()
+        }).catch(()=>{
+            this.error()
+        })
+    }
+
+    handleEmployeeDeleteCancel = ()=>{
+        this.setState({employeeModal: false})
+    }
+
+
+    getClickResult = (value)=>{
+        this.setState({employeeModal: value})
+    }
+
     render() {
-        const list = []
-        const children = []
-        for (let i = 10; i < 36; i++) {
-            children.push(<Option key={i.toString(36) + i} value={i.toString(36) + i} >{i.toString(36) + i}</Option>);
+        const employeeColumns = [
+            {
+                key: 'id',
+            },
+            {
+                title: 'name',
+                dataIndex: 'name',
+                key: 'name',
+            },
+            {
+                title: 'action',
+                render: (text, record) => (
+                    <Space size="middle">
+                        <a onClick={(e)=>this.handleEmployeeDelete(record.key)}>Delete</a>
+                    </Space>
+                ),
+            }
+        ];
+        const scheduleColumns = [
+            {
+                key: 'id',
+            },
+            {
+                title: 'name',
+                dataIndex: 'name',
+                key: 'name',
+            },
+            {
+                title: 'action',
+                render: (text, record) => (
+                    <Space size="middle">
+                        <a onClick={(e)=>this.handleScheduleDelete(record.key)}>Delete</a>
+                    </Space>
+                ),
+            }
+        ];
+        let employeeList = this.props.employee.list.map((item)=>({key: item.employee_id, name: item.employee_name}))
+        let scheduleList = this.props.schedule.list.map((item, index)=>({key: index, name: item}))
+        let employeeSelection = []
+        for (let i = 0; i < this.props.employee.list.length; i++) {
+            employeeSelection.push(<Option key={this.props.employee.list[i].employee_name} >{this.props.employee.list[i].employee_name}</Option>);
         }
         return (
             <Fragment>
@@ -132,10 +240,10 @@ class Manage extends Component {
                                 </div>
                             }
                         >
-                            <Table columns={columns} dataSource={data} />
+                            <Table columns={employeeColumns} dataSource={employeeList} />
                         </Card>
                         <Modal width={1000}  title="Employee" visible={this.state.isAddModalVisible} onOk={this.handleAddOk} onCancel={this.handleAddCancel}>
-                            <AddingEmployeeTable/>
+                            <AddingEmployeeTable getClickResult={this.getClickResult}/>
                         </Modal>
                     </Col>
                     <Col offset={1}>
@@ -150,10 +258,15 @@ class Manage extends Component {
                                 placeholder="Please select"
                                 onChange={this.handleServiceSelector}
                             >
-                                {children}
+                                {employeeSelection}
                             </Select>
                             <Button style={{marginLeft: 30}} type={"primary"} onClick={this.handleSet}>Set</Button>
-                            <Table  style={{marginTop: 10}} pagination={false} scroll={{y: 300}} columns={columns} dataSource={list} />
+                            <Table  style={{marginTop: 10}} pagination={false} scroll={{y: 300}} columns={scheduleColumns} dataSource={scheduleList} />
+                        </div>
+                    </Modal>
+                    <Modal width={1000}  title="Delete" visible={this.state.employeeModal} onOk={this.handleEmployeeDeleteOk} onCancel={this.handleEmployeeDeleteCancel}>
+                        <div style={{textAlign: "center"}}>
+                            <a style={{fontSize: 20}}>Are you sure to delete this?</a>
                         </div>
                     </Modal>
                 </Row>
@@ -162,4 +275,10 @@ class Manage extends Component {
     }
 }
 
-export default Manage;
+export default connect(
+    state => ({employee: state.employee, schedule: state.schedule}),
+    {
+        addEmployee: addEmployee, setEmployee: setEmployee, deleteEmployee: deleteEmployee,
+        addSchedule: addSchedule, setSchedule: setSchedule, deleteSchedule: deleteSchedule,
+        }
+)(Manage);

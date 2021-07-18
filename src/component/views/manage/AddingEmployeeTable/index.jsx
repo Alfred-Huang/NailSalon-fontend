@@ -4,6 +4,8 @@ import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import server from "../../../../config/config";
 import {v4 as uuidv4} from "uuid";
 import axios from "axios";
+import {connect} from "react-redux";
+import {addEmployee, deleteEmployee, setEmployee} from "../../../../redux/action/employee";
 
 class AddingEmployeeTable extends Component {
 
@@ -15,6 +17,12 @@ class AddingEmployeeTable extends Component {
         message.error('Fail');
     };
 
+    sendClickResult = () =>{
+        return ()=>{
+            this.props.getClickResult(false);
+        }
+    }
+
     onFinish = (values)=>{
         const dataList = [];
         for(let i = 0; i < values.list.length; i++){
@@ -22,10 +30,12 @@ class AddingEmployeeTable extends Component {
             dataList.push({employeeId: uuidv4(), ...data})
         }
         const employeeList = [...dataList];
-        console.log(employeeList)
+        const employeeListForAdd = dataList.map((item)=>({employee_id: item.employeeId, employee_name: item.name}))
         let api = server.IP + "/manage/addEmployee"
         axios.post(api, {employeeList}).then((result)=>{
+            this.props.addEmployee(employeeListForAdd)
             this.success()
+            this.sendClickResult()
         }).catch(()=>{
             this.error()
         })
@@ -69,4 +79,7 @@ class AddingEmployeeTable extends Component {
     }
 }
 
-export default AddingEmployeeTable;
+export default connect(
+    state => ({employee: state.employee}),
+    {addEmployee: addEmployee, setEmployee: setEmployee, deleteEmployee: deleteEmployee}
+)(AddingEmployeeTable);

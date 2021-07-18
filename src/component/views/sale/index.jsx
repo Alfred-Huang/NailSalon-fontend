@@ -1,19 +1,7 @@
 import React, {Component, Fragment} from 'react';
 import {
-    Tag,
-    Space,
-    Table,
-    Button,
-    DatePicker,
-    Col,
-    Card,
-    Row,
-    Divider,
-    Form,
-    Input,
-    InputNumber,
-    Select,
-    message
+    Tag, Space, Table, Button, DatePicker, Col, Card, Row,
+    Divider, Form, Input, InputNumber, Select, message
 } from "antd";
 import moment from 'moment';
 import {v4 as uuidv4} from "uuid";
@@ -190,9 +178,10 @@ class Sale extends Component {
         for(let i = 0; i < value.length; i++){
             let name = value[i]
             let target = this.props.employeeList.list.filter((employee)=>{
-                return employee.name === name
+                console.log(employee)
+                return employee.employee_name === name
             })
-            idList.push(target[0].employeeId)
+            idList.push(target[0].employee_id)
         }
         this.setState({employees: value, employeeIdList: idList})
     }
@@ -236,7 +225,7 @@ class Sale extends Component {
         const serviceSelection = [];
         const data= this.props.saleRecord.record.map(item=>({key: item.sale_id, employees: item.employees, services: item.services, price: item.price, date: item.date, time: item.time}));
         for (let i = 0; i < this.props.employeeList.list.length; i++) {
-            employeeSelection.push(<Option key={this.props.employeeList.list[i].name} >{this.props.employeeList.list[i].name}</Option>);
+            employeeSelection.push(<Option key={this.props.employeeList.list[i].employee_name} >{this.props.employeeList.list[i].employee_name}</Option>);
         }
 
         for (let i = 0; i < this.props.serviceList.list.length; i++) {
