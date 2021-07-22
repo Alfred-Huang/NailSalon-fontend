@@ -178,7 +178,6 @@ class Sale extends Component {
         for(let i = 0; i < value.length; i++){
             let name = value[i]
             let target = this.props.employeeList.list.filter((employee)=>{
-                console.log(employee)
                 return employee.employee_name === name
             })
             idList.push(target[0].employee_id)

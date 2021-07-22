@@ -1,65 +1,123 @@
 import React, {Component, Fragment} from 'react';
-import {Form,Input, Row, Col, Card, Button, Tag, Modal, Select, Table,InputNumber} from "antd";
+import {Form, Input, Row, Col, Card, Button, Tag, Modal, Select, Table, InputNumber, message} from "antd";
 import AddingTable from "./AddingTable";
 import EditableTable from "./EditableTable"
-import { PlusOutlined } from '@ant-design/icons';
+import server from "../../../../config/config";
+import axios from "axios";
+import {connect} from "react-redux";
+import {searchNumber, searchType, setProduct} from "../../../../redux/action";
+
 
 const { CheckableTag } = Tag;
-const tagsData = ['Movies', 'Books', 'Music', 'Sports'];
 class Products extends Component {
 
     state = {
-        selectedTags: ['Books'],
+        selectedTags: [],
         isModalVisible:false,
-        dataSource:[{
-            key: 0,
-            brand: "",
-            type: "",
-            number: "",
-            quantity: 0
-        }],
-        count:1,
+        brandTag: [],
+        searchList:{list:[]},
+        searchFlag: false,
     };
+
+    componentDidMount() {
+        this.getProductBrandTag()
+        this.getAllProduct();
+    }
 
     handleChange(tag, checked) {
         const { selectedTags } = this.state;
         const nextSelectedTags = checked ? [...selectedTags, tag] : selectedTags.filter(t => t !== tag);
-        console.log('You are interested in: ', nextSelectedTags);
-        this.setState({ selectedTags: nextSelectedTags });
+        let getProductApi = server.IP + "/product/getProductByTags";
+        const tagList = nextSelectedTags
+        if(tagList.length === 0){
+            this.getAllProduct()
+        }else{
+            axios.post(getProductApi, {tagList}).then((result)=>{
+                const data = {list: result.data}
+                this.props.setProduct(data)
+            }).catch(()=>{
+                this.error("Fail to load data")
+            })
+            this.setState({ selectedTags: nextSelectedTags, searchList: {list: []}});
+        }
+
     }
+
+    getProductBrandTag = ()=>{
+        let getBrandTagApi = server.IP + "/product/getBrandTag";
+        axios.post(getBrandTagApi).then((result)=>{
+            this.setState({brandTag: result.data})
+        }).catch(()=>{
+            this.error("Fail to load tag")
+        })
+        this.getAllProduct();
+    }
+
+
+    getProductBrandTagWithoutGetAlProduct = ()=>{
+        let getBrandTagApi = server.IP + "/product/getBrandTag";
+        axios.post(getBrandTagApi).then((result)=>{
+            this.setState({brandTag: result.data})
+        }).catch(()=>{
+            this.error("Fail to load tag")
+        })
+    }
+
+    setSelectTag = () =>{
+        this.setState({ selectedTags: []});
+    }
+
+    getAllProduct = ()=>{
+        let getProductApi = server.IP + "/product/getProduct";
+        axios.post(getProductApi).then((result)=>{
+            const data = {list: result.data}
+            this.props.setProduct(data)
+        }).catch(()=>{
+            this.error("Fail to load data")
+        })
+        this.setState({ selectedTags: [], searchList: {list: []}});
+    }
+    success = () => {
+        message.success('Success');
+    }
+
+
+    error = (mesg) => {
+        message.error(mesg);
+    };
 
     showModal = ()=>{
         this.setState({isModalVisible: true})
     }
 
     handleOk = ()=>{
+        this.getProductBrandTagWithoutGetAlProduct()
         this.setState({isModalVisible: false})
     }
 
     handleCancel = () =>{
+        this.getProductBrandTagWithoutGetAlProduct()
         this.setState({isModalVisible: false})
     }
 
-    save = () => {
-        this.props.form.validateFields().then(values=>{
-          console.log(values)
+    handleSearchType = (e)=>{
+        let resArr = {list:[]};
+        this.props.product.list.filter(item => {
+            if (item.type.indexOf(e.target.value) >= 0) {
+                resArr.list.push(item);
+            }
         })
+       this.setState({searchList: resArr});
     }
 
-    onFinish = (values)=>{
-        console.log(values)
-    }
-
-    addRow = ()=>{
-        const {count, dataSource} = this.state
-        const newData =  {
-            key: count + 1,
-            brand: "",
-            type: "",
-            number: "",
-            quantity: 0
-        }
-        this.setState({dataSource: [...dataSource, newData], count: count + 1})
+    handleSearchNumber = (e)=>{
+        let resArr = {list:[]};
+        this.props.product.list.filter(item => {
+            if (item.number.indexOf(e.target.value) >= 0) {
+                resArr.list.push(item);
+            }
+        })
+        this.setState({searchList: resArr});
     }
 
     render() {
@@ -68,21 +126,25 @@ class Products extends Component {
                 <Row style={{marginTop: 50}}>
                     <Col offset={1}>
                         <Card style={{width: "calc(100vw * 0.13)"}}>
-                            <Input style={{width: 200}} placeholder="Search brand or number" />
+                            <Input onChange={(e)=>this.handleSearchType(e)} style={{width: 200}} placeholder="Search type" />
                         </Card>
                     </Col>
                     <Col>
-                        <Card style={{width: "calc(100vw * 0.64)"}}>
-                            <div style={{float: "right"}}>
-                                <Button  type={"link"}>Change Item Quantity</Button>
-                            </div>
+                        <Card style={{width: "calc(100vw * 0.13)"}}>
+                            <Input onChange={(e)=>this.handleSearchNumber(e)} style={{width: 200}} placeholder="Search number" />
                         </Card>
+                    </Col>
+                    <Col  style={{width: "calc(100vw * 0.51)"}}>
+
                     </Col>
                 </Row>
                 <Row style={{marginTop: 5}}>
                     <Col offset={1}>
                         <div style={{width: "calc(100vw - 440px)", height: 40, display: "inline-block", backgroundColor: "white", textAlign: "center"}}>
-                            {tagsData.map(tag => (
+                            <div style={{display: "inline-block"}}>
+                                <Button  type="link" block style={{display: "inline-block"}} onClick={this.getAllProduct}>All</Button>
+                            </div>
+                            {this.state.brandTag.map(tag => (
                                 <CheckableTag
                                     key={tag}
                                     checked={this.state.selectedTags.indexOf(tag) > -1}
@@ -100,11 +162,11 @@ class Products extends Component {
                         <Button type="primary" onClick={this.showModal}>Add</Button>
                     </Col>
                     <Col>
-                        <EditableTable />
+                        <EditableTable getProductBrandTagWithoutGetAlProduct={this.getProductBrandTagWithoutGetAlProduct} searchList={this.state.searchList}/>
                     </Col>
                     <Modal width={1000}  title="Employee Schedule" visible={this.state.isModalVisible} onOk={this.handleOk} onCancel={this.handleCancel} cancelButtonProps >
                         <div style={{marginTop: 10}}>
-                            <AddingTable />
+                            <AddingTable getProductBrandTagWithoutGetAlProduct={this.getProductBrandTagWithoutGetAlProduct} setSelectTag={this.setSelectTag}/>
                         </div>
                     </Modal>
                 </Row>
@@ -113,4 +175,7 @@ class Products extends Component {
     }
 }
 
-export default Products;
+export default connect(
+    state =>({product: state.product}),
+    {setProduct: setProduct, searchType: searchType, searchNumber: searchNumber}
+)(Products);

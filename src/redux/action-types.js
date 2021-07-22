@@ -18,3 +18,11 @@ export const DELETE_EMPLOYEE = "DELETE_EMPLOYEE"
 export const ADD_SCHEDULE = "ADD_SCHEDULE";
 export const DELETE_SCHEDULE = "DELETE_SCHEDULE";
 export const SET_SCHEDULE = "SET_SCHEDULE";
+
+
+export const ADD_PRODUCT = "ADD_PRODUCT";
+export const DELETE_PRODUCT = "DELETE_PRODUCT";
+export const SET_PRODUCT = "SET_PRODUCT";
+export const UPDATE_PRODUCT = "UPDATE_PRODUCT";
+export const SEARCH_TYPE = "SEARCH_TYPE";
+export const SEARCH_NUMBER = "SEARCH_NUMBER";

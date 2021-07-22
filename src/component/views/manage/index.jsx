@@ -78,6 +78,7 @@ class Manage extends Component {
         }else{
             let api = server.IP + "/manage/addSchedule";
             axios.post(api, {schedule}).then((result)=>{
+                this.props.addSchedule(this.state.employeeList)
                 this.success()
             }).catch(()=>{
                 this.error()
@@ -86,7 +87,6 @@ class Manage extends Component {
     }
 
     updateSchedule = (employee)=>{
-        console.log(employee)
         employee += " ";
         for(let i = 0; i < this.props.schedule.list.length; i++){
             employee += this.props.schedule.list[i]
@@ -142,7 +142,6 @@ class Manage extends Component {
 
     handleEmployeeDeleteOk = () =>{
         let api = server.IP + "/manage/deleteEmployee"
-
         let id = this.state.targetId
         axios.post(api, {id}).then((result)=>{
             this.props.deleteEmployee(id)
@@ -159,7 +158,6 @@ class Manage extends Component {
         })
         let api = server.IP + "/manage/deleteSchedule"
         let employee = ""
-        console.log(newSchedule)
         for(let i = 0; i < newSchedule.length; i++){
             employee += newSchedule[i]
             if(i !== newSchedule.length - 1){
@@ -247,7 +245,7 @@ class Manage extends Component {
                         </Modal>
                     </Col>
                     <Col offset={1}>
-                        <Calendar mode="month" style={{width: "calc(100vw * 0.45)"}} onChange={this.onSelect}/>
+                        <Calendar  style={{width: "calc(100vw * 0.45)"}} onSelect={this.onSelect}/>
                     </Col>
                     <Modal width={1000}  title="Employee Schedule" visible={this.state.isModalVisible} onOk={this.handleOk} onCancel={this.handleCancel}>
                         <div style={{marginTop: 10, textAlign: "center"}}>

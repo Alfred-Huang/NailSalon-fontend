@@ -4,6 +4,8 @@ import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import server from "../../../../../config/config";
 import {v4 as uuidv4} from "uuid";
 import axios from "axios";
+import {connect} from "react-redux";
+import {setProduct} from "../../../../../redux/action";
 
 class AddingTable extends Component {
     success = () => {
@@ -16,8 +18,8 @@ class AddingTable extends Component {
 
 
 
+
     onFinish = (values)=>{
-        console.log('Received values of form:', values.list);
         const dataList = [];
         for(let i = 0; i < values.list.length; i++){
             const data = values.list[i];
@@ -25,8 +27,10 @@ class AddingTable extends Component {
         }
         const productList = [...dataList];
         let api = server.IP + "/product/addProduct"
-        console.log(productList)
         axios.post(api, {productList}).then((result)=>{
+            const data = {list: productList}
+            this.props.setProduct(data)
+            this.props.setSelectTag()
             this.success()
         }).catch(()=>{
             this.error()
@@ -91,4 +95,7 @@ class AddingTable extends Component {
     }
 }
 
-export default AddingTable;
+export default  connect(
+    state =>({product: state.product}),
+    {setProduct: setProduct}
+)(AddingTable);

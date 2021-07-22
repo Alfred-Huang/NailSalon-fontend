@@ -1,6 +1,11 @@
 import React, {useContext, useState, useEffect, useRef, Fragment} from 'react';
-import {Table, Input, Button, Popconfirm, Form, Card} from 'antd';
+import {Table, Input, Button, Popconfirm, Form, Card, message} from 'antd';
 import "./index.css"
+import {connect} from "react-redux";
+import {deleteEmployee, deleteProduct, setProduct} from "../../../../../redux/action";
+import {updateProduct} from "../../../../../redux/action/product";
+import server from "../../../../../config/config";
+import axios from "axios";
 
 const EditableContext = React.createContext(null);
 
@@ -45,8 +50,6 @@ const EditableCell = ({
             const values = await form.validateFields();
             toggleEdit();
             handleSave({ ...record, ...values });
-            console.log(record.id)
-            console.log("-------------------------------")
         } catch (errInfo) {
             console.log('Save failed:', errInfo);
         }
@@ -115,127 +118,69 @@ class EditableTable extends React.Component {
                 title: 'operation',
                 dataIndex: 'operation',
                 render: (_, record) =>
-                    this.state.dataSource.length >= 1 ? (
+                    this.props.product.list.length >= 1 ? (
                         <Popconfirm title="Sure to delete?" onConfirm={() => this.handleDelete(record.id)}>
                             <a>Delete</a>
                         </Popconfirm>
                     ) : null,
             },
         ];
-        this.state = {
-            dataSource: [
-                {
-                    key: '0',
-                    id: "1",
-                    brand: 'Edward King 0',
-                    type: 'asdas',
-                    number: '234',
-                    quantity: 1,
-                },
-                {
-                    key: '1',
-                    id: "2",
-                    brand: 'Edward King 0',
-                    type: 'asdas',
-                    number: '234',
-                    quantity: 2,
-                },
-                {
-                    key: '2',
-                    id: "3",
-                    brand: 'Edward King 0',
-                    type: 'asdas',
-                    number: '234',
-                    quantity: 0,
-                },
-                {
-                    key: '3',
-                    id: "4",
-                    brand: 'Edward King 0',
-                    type: 'asdas',
-                    number: '234',
-                    quantity: 0,
-                },
-                {
-                    key: '4',
-                    id: "5",
-                    brand: 'Edward King 0',
-                    type: 'asdas',
-                    number: '234',
-                    quantity: 0,
-                },
-                {
-                    key: '5',
-                    id: "6",
-                    brand: 'Edward King 0',
-                    type: 'asdas',
-                    number: '234',
-                    quantity: 0,
-                },
-                {
-                    key: '6',
-                    id: "7",
-                    brand: 'Edward King 0',
-                    type: 'asdas',
-                    number: '234',
-                    quantity: 0,
-                },
-                {
-                    key: '7',
-                    id: "8",
-                    brand: 'Edward King 0',
-                    type: 'asdas',
-                    number: '234',
-                    quantity: 0,
-                },
-                {
-                    key: '8',
-                    id: "9",
-                    brand: 'Edward King 0',
-                    type: 'asdas',
-                    number: '234',
-                    quantity: 0,
-                },
-                {
-                    key: '9',
-                    id: "10",
-                    brand: 'Edward King 0',
-                    type: 'asdas',
-                    number: '234',
-                    quantity: 0,
-                },
-                {
-                    key: '10',
-                    id: "11",
-                    brand: 'Edward King 0',
-                    type: 'asdas',
-                    number: '234',
-                    quantity: 0,
-                },
-            ],
-            count: 2,
-        };
     }
 
+
     handleDelete = (id) => {
-        const dataSource = [...this.state.dataSource];
-        this.setState({
-            dataSource: dataSource.filter((item) => item.id !== id),
-        });
+        const dataSource = [...this.props.product.list];
+        const newProduct = {list: dataSource.filter((item) => item.productId !== id)}
+        let api = server.IP + "/product/deleteProduct";
+        let targetId = id;
+        axios.post(api, {targetId}).then((result)=>{
+            this.props.setProduct(newProduct)
+            this.props.getProductBrandTagWithoutGetAlProduct()
+            this.success()
+        }).catch(()=>{
+            this.error("Fail to update data")
+        })
+
     };
 
     handleSave = (row) => {
-        const newData = [...this.state.dataSource];
-        const index = newData.findIndex((item) => row.id === item.id);
-        const item = newData[index];
-        newData.splice(index, 1, { ...item, ...row });
-        this.setState({
-            dataSource: newData,
-        });
+        let api = server.IP + "/product/updateProduct";
+        const data = {productId: row.id, brand: row.brand, type: row.type, number: row.number, quantity: row.quantity}
+        axios.post(api, {data}).then((result)=>{
+            const newData = [...this.props.product.list];
+            const index = newData.findIndex((item) => row.id === item.productId);
+            const item = newData[index];
+            newData.splice(index, 1, { ...item, ...row });
+            const newProduct = {list: newData}
+            this.props.setProduct(newProduct)
+        }).catch(()=>{
+            this.error("Fail to update data")
+        })
     };
+    success = () => {
+        message.success('Success');
+    }
 
+    error = (mesg) => {
+        message.error(mesg);
+    };
     render() {
-        const { dataSource } = this.state;
+
+       let dataSource =  this.props.product.list.map((item, index)=>({
+            key: index,
+            id: item.productId,
+            brand: item.brand,
+            type: item.type,
+            number: item.number,
+            quantity: item.quantity}))
+
+        let searchList = this.props.searchList.list.map((item, index)=>({
+                        key: index,
+                        id: item.productId,
+                        brand: item.brand,
+                        type: item.type,
+                        number: item.number,
+                        quantity: item.quantity}))
         const components = {
             body: {
                 row: EditableRow,
@@ -265,7 +210,7 @@ class EditableTable extends React.Component {
                         components={components}
                         rowClassName={() => 'editable-row'}
                         bordered
-                        dataSource={dataSource}
+                        dataSource={ searchList.length > 0 ? (searchList.length === dataSource.length ? dataSource : searchList) : dataSource}
                         columns={columns}
                         scroll={{y: 600}}
                     />
@@ -274,4 +219,7 @@ class EditableTable extends React.Component {
         );
     }
 }
-export default EditableTable;
+export default connect(
+    state =>({product: state.product}),
+    {updateProduct: updateProduct, deleteProduct: deleteProduct, setProduct: setProduct}
+)(EditableTable)
