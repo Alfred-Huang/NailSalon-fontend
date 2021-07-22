@@ -7,7 +7,7 @@ import moment from 'moment';
 import {v4 as uuidv4} from "uuid";
 import axios from "axios";
 import server from "../../../config/config";
-import {addSaleRecord, setSaleRecord} from "../../../redux/action/index"
+import {addSaleRecord, setEmployee, setSaleRecord, setService} from "../../../redux/action/index"
 import {connect} from "react-redux";
 const { Option } = Select;
 const { Search } = Input;
@@ -63,10 +63,24 @@ class Sale extends Component {
                 date: date,
                 searchDate: date
             })
-        let api = server.IP + "/sale/getSaleRecord";
-        axios.get(api, {params:{ date: date}}).then((result)=>{
+        let saleApi = server.IP + "/sale/getSaleRecord";
+        axios.get(saleApi, {params:{ date: date}}).then((result)=>{
             const record = {record: result.data}
             this.props.setSaleRecord(record)
+        }).catch(()=>{
+            this.error()
+        })
+        let serviceApi = server.IP + "/setting/getServiceList"
+        axios.post(serviceApi).then((result)=>{
+            const list = {list: result.data}
+            this.props.setService(list)
+        }).catch(()=>{
+            this.error()
+        })
+        let employeeApi = server.IP + "/manage/getEmployee"
+        axios.post(employeeApi).then((result)=>{
+            const list = {list: result.data}
+            this.props.setEmployee(list)
         }).catch(()=>{
             this.error()
         })
@@ -320,5 +334,5 @@ class Sale extends Component {
 
 export default connect(
     state =>({employeeList: state.employee, serviceList: state.service, saleRecord: state.sale}),
-    {setSaleRecord: setSaleRecord, addSaleRecord: addSaleRecord}
+    {setSaleRecord: setSaleRecord, addSaleRecord: addSaleRecord, setService: setService, setEmployee: setEmployee}
     )(Sale);

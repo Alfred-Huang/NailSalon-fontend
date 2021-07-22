@@ -6,154 +6,18 @@ import {
     Card,
     Modal,
     Calendar,
-    List,
-    Row,
-    Col,
     Table,
-    Tag,
     Form,
     Input,
     InputNumber,
     message
 } from "antd";
-import moment from 'moment';
 import server from "../../../config/config";
 import {v4 as uuidv4} from "uuid";
 import axios from "axios";
+import {connect} from "react-redux";
+import {setEmployee, setService} from "../../../redux/action";
 const { Option } = Select;
-const children = [];
-for (let i = 10; i < 36; i++) {
-    children.push(<Option key={i.toString(36) + i}>{i.toString(36) + i}</Option>);
-}
-
-const columns = [
-    {
-        title: 'Name',
-        dataIndex: 'name',
-        key: 'name',
-        render: text => <a>{text}</a>,
-    },
-    {
-        title: 'Services',
-        key: 'services',
-        dataIndex: 'services',
-        render: services => (
-            <>
-                {services.map(services => {
-                    let color = services.length > 5 ? 'geekblue' : 'green';
-                    if (services === 'loser') {
-                        color = 'volcano';
-                    }
-                    return (
-                        <Tag color={color} key={services}>
-                            {services.toUpperCase()}
-                        </Tag>
-                    );
-                })}
-            </>
-        ),
-    },
-    {
-        title: 'People',
-        dataIndex: 'people',
-        key: 'people',
-    },
-    {
-        title: 'Employees',
-        key: 'employees',
-        dataIndex: 'employees',
-        render: employees => (
-            <>
-                {employees.map(employee => {
-                    let color = employee.length > 5 ? 'geekblue' : 'green';
-                    if (employee === 'loser') {
-                        color = 'volcano';
-                    }
-                    return (
-                        <Tag color={color} key={employee}>
-                            {employee.toUpperCase()}
-                        </Tag>
-                    );
-                })}
-            </>
-        ),
-    },
-    {
-        title: 'Time',
-        dataIndex: 'time',
-        key: 'time',
-    },
-    {
-        title: 'Action',
-        key: 'action',
-        render: (text, record) => (
-            <Space size="middle">
-                <a>Edit</a>
-                <a>Delete</a>
-            </Space>
-        ),
-    },
-];
-
-const data2 = [
-    {
-        key: '1',
-        name: 'John Brown',
-        services: ['nice', 'developer'],
-        people: 2,
-        employees: ['dd', 'aa'],
-        time: "12:00"
-    },
-    {
-        key: '2',
-        name: 'John Brown',
-        services: ['nice', 'developer'],
-        people: 3,
-        employees: ['dd', 'aa'],
-        time: "12:00"
-    },
-    {
-        key: '3',
-        name: 'John Brown',
-        services: ['nice', 'developer'],
-        people: 4,
-        employees: ['dd', 'aa'],
-        time: "12:00"
-    },
-    {
-        key: '4',
-        name: 'John Brown',
-        services: ['nice', 'developer'],
-        people: 4,
-        employees: ['dd', 'aa'],
-        time: "12:00"
-    },
-    {
-        key: '5',
-        name: 'John Brown',
-        services: ['nice', 'developer'],
-        people: 4,
-        employees: ['dd', 'aa'],
-        time: "12:00"
-    },
-    {
-        key: '6',
-        name: 'John Brown',
-        services: ['nice', 'developer'],
-        people: 4,
-        employees: ['dd', 'aa'],
-        time: "12:00"
-    },
-    {
-        key: '7',
-        name: 'John Brown',
-        services: ['nice', 'developer', "dd", "dsad"],
-        people: 4,
-        employees: ['dd', 'aa'],
-        time: "12:00"
-    },
-
-];
 
 
 class Appointment extends Component {
@@ -162,7 +26,25 @@ class Appointment extends Component {
         isModalVisible: false,
         services: [],
         employees:[],
-        date: ""
+        date: "",
+        dataSource: [],
+    }
+
+    componentDidMount() {
+        let serviceApi = server.IP + "/setting/getServiceList"
+        axios.post(serviceApi).then((result)=>{
+            const list = {list: result.data}
+            this.props.setService(list)
+        }).catch(()=>{
+            this.error()
+        })
+        let employeeApi = server.IP + "/manage/getEmployee"
+        axios.post(employeeApi).then((result)=>{
+            const list = {list: result.data}
+            this.props.setEmployee(list)
+        }).catch(()=>{
+            this.error()
+        })
     }
 
     handleOk = ()=>{
@@ -174,8 +56,16 @@ class Appointment extends Component {
     }
 
     onSelect = (value) =>{
-        const date = value.format("YYYY/MM/DD")
-        this.setState({isModalVisible: true, date: date})
+        const date = value.format("YYYY-MM-DD")
+        this.setState({isModalVisible: true, date: date},()=>{
+            let api = server.IP + "/appointment/getAppointment";
+            let targetDate = date
+            axios.post(api, {targetDate}).then((result)=>{
+                this.setState({dataSource: result.data})
+            }).catch(()=>{
+                this.error()
+            })
+        })
     }
     success = () => {
         message.success('Success');
@@ -186,7 +76,6 @@ class Appointment extends Component {
     };
 
     onFinish = (value)=> {
-
         let employee = "";
         for (let i = 0; i < value.employees.length; i++) {
             employee += value.employees[i];
@@ -201,20 +90,35 @@ class Appointment extends Component {
                 service += " "
             }
         }
-        console.log(employee)
         const appointment = {
             appointmentId: uuidv4(), customer: value.customer, service: service,
             employee: employee, people: value.people, date: this.state.date, time: value.time
         }
+        const newAppointment = {appointment_id: appointment.appointmentId, customer: value.customer, service: service,
+            employee: employee, people: value.people, date: this.state.date, time: value.time}
         let api = server.IP + "/appointment/addAppointment";
         axios.post(api, {appointment}).then((result) => {
+            this.setState({  services: [], employees:[], dataSource: [newAppointment,...this.state.dataSource]})
             this.success()
-            this.setState({  services: [], employees:[]})
             this.reset();
         }).catch(()=>{
             this.error()
         })
 
+    }
+
+    deleteAppointment = (id)=>{
+        let api = server.IP + "/appointment/deleteAppointment";
+        let targetId = id
+        axios.post(api, {targetId}).then((result) => {
+           let newState = this.state.dataSource
+            newState = newState.filter((item)=>{
+                return item.appointment_id !== id
+            })
+            this.setState({dataSource: newState})
+        }).catch(()=>{
+            this.error()
+        })
     }
 
     reset = ()=>{
@@ -223,6 +127,56 @@ class Appointment extends Component {
 
 
     render() {
+
+        const data = this.state.dataSource.map((item)=>({key: item.appointment_id, customer: item.customer, service: item.service, people: item.people, employee: item.employee, time: item.time}))
+        const columns = [
+            {
+                title: 'Name',
+                dataIndex: 'customer',
+                key: 'customer',
+                render: text => <a>{text}</a>,
+            },
+            {
+                title: 'Services',
+                key: 'service',
+                dataIndex: 'service',
+
+            },
+            {
+                title: 'People',
+                dataIndex: 'people',
+                key: 'people',
+            },
+            {
+                title: 'Employees',
+                key: 'employee',
+                dataIndex: 'employee',
+            },
+            {
+                title: 'Time',
+                dataIndex: 'time',
+                key: 'time',
+            },
+            {
+                title: 'Action',
+                key: 'action',
+                render: (text, record) => (
+                    <Space size="middle">
+                        <a onClick={(e)=>this.deleteAppointment(record.key)}>Delete</a>
+                    </Space>
+                ),
+            },
+        ];
+
+        const employeeSelection = [];
+        const serviceSelection = [];
+        for (let i = 0; i < this.props.employeeList.list.length; i++) {
+            employeeSelection.push(<Option key={this.props.employeeList.list[i].employee_name} >{this.props.employeeList.list[i].employee_name}</Option>);
+        }
+
+        for (let i = 0; i < this.props.serviceList.list.length; i++) {
+            serviceSelection.push(<Option key={this.props.serviceList.list[i].service}>{this.props.serviceList.list[i].service}</Option>);
+        }
         return (
             <Fragment>
                 <Card style={{marginTop: 50, marginLeft: "auto", marginRight: "auto", width: "calc(100vw * 0.8)"}}>
@@ -250,7 +204,7 @@ class Appointment extends Component {
                                 style={{ width: 300 }}
                                 placeholder="Please select"
                             >
-                                {children}
+                                {serviceSelection}
                             </Select>
                         </Form.Item>
                         <Form.Item
@@ -267,7 +221,7 @@ class Appointment extends Component {
                                 style={{ width: 300 }}
                                 placeholder="Please select"
                             >
-                                {children}
+                                {employeeSelection}
                             </Select>
                         </Form.Item>
                         <Form.Item
@@ -284,7 +238,7 @@ class Appointment extends Component {
                         </Form.Item>
                     </Form>
                     <div style={{marginTop: 10}}>
-                        <Table  pagination={false} scroll={{y: 300}} columns={columns} dataSource={data2} />
+                        <Table  pagination={false} scroll={{y: 300}} columns={columns} dataSource={data} />
                     </div>
                 </Modal>
             </Fragment>
@@ -292,4 +246,7 @@ class Appointment extends Component {
     }
 }
 
-export default Appointment;
+export default  connect(
+    state =>({employeeList: state.employee, serviceList: state.service}),
+    {setService: setService, setEmployee: setEmployee}
+)(Appointment);
