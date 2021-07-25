@@ -1,5 +1,5 @@
 import React, {Component, Fragment} from 'react';
-import {Row, Col, Card, List, Table} from "antd";
+import {Row, Col, Card, List, Table, message} from "antd";
 import appointmentData from "../../../../mock/appointment";
 import server from "../../../../config/config";
 import moment from "moment";
@@ -21,6 +21,9 @@ class ItemListForAppointment extends Component {
         }).catch(()=>{
             this.error()
         })
+    }
+    error = () => {
+        message.error('Fail to load data');
     }
 
     render() {

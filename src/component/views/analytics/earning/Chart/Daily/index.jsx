@@ -1,17 +1,17 @@
 import React, {Component, Fragment} from 'react';
-import {Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts";
-import data from "../../../../../mock/dailySummary";
+import {Bar, BarChart, CartesianGrid, Legend, Line, ResponsiveContainer, Tooltip, XAxis, YAxis, LineChart} from "recharts";
 
-class MyBarChart extends Component {
+class DailyLineChart extends Component {
 
-    componentDidMount() {
-    }
+
+
 
     barChartDisplay = () =>{
+        let data = this.props.dailyDataSource.map((item)=>({hour: item.hour, sale: parseInt(item.sale)}))
         return <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-                width={500}
-                height={350}
+            <LineChart
+                width={ 500}
+                height={ 350}
                 data={data}
                 margin={{
                     top: 5,
@@ -21,12 +21,12 @@ class MyBarChart extends Component {
                 }}
             >
                 <CartesianGrid strokeDasharray="3 1" />
-                <XAxis dataKey="time" />
+                <XAxis dataKey="hour" />
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="value" fill="#8884d8" />
-            </BarChart>
+                <Line dataKey="sale" fill="#8884d8" />
+            </LineChart>
         </ResponsiveContainer>
     }
 
@@ -39,4 +39,4 @@ class MyBarChart extends Component {
     }
 }
 
-export default MyBarChart;
+export default DailyLineChart;

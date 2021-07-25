@@ -11,8 +11,7 @@ export default  [
     {path: "/dashboard", component: Dashboard, roles: ["admin"]},
     {path: "/appointment", component: Appointment, roles: ["admin"]},
     {path: "/analytics", component: Analytics, roles: ["admin"]},
-    {path: "/product/products", component: Products, roles: ["admin"]},
-    {path: "/product/setting", component: ProductSetting, roles: ["admin"]},
+    {path: "/product", component: Products, roles: ["admin"]},
     {path: "/setting", component: Setting, roles: ["admin"]},
     {path: "/sale", component: Sale, roles: ["admin"]},
     {path: "/manage", component: Manage, roles: ["admin"]}

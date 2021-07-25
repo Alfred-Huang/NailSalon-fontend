@@ -24,16 +24,6 @@ const menuList = [
         title: "Product",
         path: "/product",
         icon: "home",
-        children: [
-            {
-                title: "Products",
-                path: "/product/products"
-            },
-            {
-                title: "Setting",
-                path: "/product/setting"
-            }
-        ]
     },
     {
         title: "Manage",

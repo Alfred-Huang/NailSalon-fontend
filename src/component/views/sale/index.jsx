@@ -105,6 +105,7 @@ class Sale extends Component {
             date: this.state.date,
             time: time
         }
+        console.log(saleRecord)
         let api = server.IP + "/sale/addSaleRecord";
         axios.post(api, {saleRecord}).then((result)=>{
             const services = this.convertToString(this.state.services)
@@ -171,7 +172,7 @@ class Sale extends Component {
             let target = this.props.serviceList.list.filter((services)=>{
                 return services.service === serviceName
             })
-            idList.push(target[0].serviceId)
+            idList.push(target[0].service_id)
         }
         this.setState({services: value, serviceIdList: idList})
     }

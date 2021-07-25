@@ -2,7 +2,7 @@ import React, {Component, Fragment} from 'react';
 import EarningAnalytics from "./earning";
 import MarketAnalytics from "./market"
 import EmployeeAnalytics from "./empolyee";
-import FinancialAnalytics from "./financial";
+import FinancialAnalytics from "./yearlySummary";
 import {Col, Row} from "antd";
 
 

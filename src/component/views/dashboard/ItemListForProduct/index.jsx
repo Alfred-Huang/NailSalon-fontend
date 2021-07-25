@@ -1,5 +1,5 @@
 import React, {Component, Fragment} from 'react';
-import {Row, Col, Card, List, Table} from "antd";
+import {Row, Col, Card, List, Table, message} from "antd";
 import appointmentData from "../../../../mock/appointment";
 import server from "../../../../config/config";
 import moment from "moment";
@@ -15,14 +15,16 @@ class ItemListForProduct extends Component {
         let date = moment().format("YYYY-MM-DD")
         axios.post(api, {date}).then((result)=>{
             if(result.data.length > 0){
-                let newData = result.data.map((item)=>({key: item.product_id, brand: item.brand, type: item.type, number: item.number, quantity: item.quantity}))
+                let newData = result.data.map((item)=>({key: item.productId, brand: item.brand, type: item.type, number: item.number, quantity: item.quantity}))
                 this.setState({dataSource: newData})
             }
         }).catch(()=>{
             this.error()
         })
     }
-
+    error = () => {
+        message.error('Fail to load data');
+    }
     render() {
 
         const columns = [

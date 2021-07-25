@@ -1,28 +1,74 @@
 import React, {Component, Fragment} from 'react';
-import {Button, Card, Col, DatePicker, Row, Select, Input,Divider} from "antd";
-import MyBarChart from "../charts/BarChart";
+import {Button, Card, Col, DatePicker, Row, Select, Input, Divider, message} from "antd";
+import MonthlyLineChart from "./Chart/Monthly";
+import DailyLineChart from "./Chart/Daily";
+import moment from "moment";
+import server from "../../../../config/config";
+import axios from "axios";
 
 
-const { Option } = Select;
-function onChange(date, dateString) {
-    console.log(date, dateString);
-}
-
-function handleChange(value) {
-    console.log(`selected ${value}`);
-}
+const monthDateFormat = "YYYY-MM"
+const dateFormat = "YYYY-MM-DD"
 class EarningAnalytics extends Component {
+    state ={
+        monthDate: "",
+        date: "",
+        monthDataSource: [],
+        dailyDataSource: [],
+    }
+    componentDidMount() {
+        const curMonth = moment().format("YYYY-MM")
+        const curDate = moment().format("YYYY-MM-DD")
+        const nextMonth = moment(curMonth).add(1, "months").format("YYYY-MM")
+        this.setState({monthDate: curMonth, date: curDate})
+        this.getMonthlySummary(curMonth, nextMonth)
+        this.getDailySummary(curDate)
+    }
+
+    getMonthlySummary = (curMonth, nextMonth)=>{
+        let api = server.IP + "/analytics/getMonthlySummary"
+        const date = {curMonth: curMonth, nextMonth: nextMonth}
+        axios.post(api, date).then((result)=>{
+            this.setState({monthDataSource: result.data, monthDate: curMonth})
+        }).catch(()=>{
+            this.error()
+        })
+    }
+
+    getDailySummary = (dateString) =>{
+        let api = server.IP + "/analytics/getDailySummary"
+        const date = dateString
+        axios.post(api, {date}).then((result)=>{
+            this.setState({dailyDataSource: result.data})
+        }).catch(()=>{
+            this.error()
+        })
+    }
+    error = () => {
+        message.error('Fail to load data');
+    };
+
+
+    monthChange = (date, dateString) =>{
+        let nextMonth =  moment(dateString).add(1, "months").format("YYYY-MM");
+        this.setState({monthDate: dateString})
+        this.getMonthlySummary(dateString, nextMonth)
+    }
+
+    dailyChange = (date, dateString) =>{
+        this.setState({date: dateString})
+        console.log(dateString)
+        this.getDailySummary(dateString)
+    }
+
+
     render() {
         return (
             <Fragment>
                     <Col>
                         <Row>
                             <Col>
-                                <DatePicker onChange={onChange} picker="month" />
-                            </Col>
-                            <p style={{marginTop: 5, marginLeft: 13, fontWeight: 500, color: "#002233" }}>Compare to</p>
-                            <Col offset={1}>
-                                <DatePicker onChange={onChange} picker="month" />
+                                <DatePicker value={moment(this.state.monthDate, monthDateFormat)} format={monthDateFormat} onChange={this.monthChange} picker="month" />
                             </Col>
                         </Row>
                         <Card
@@ -32,18 +78,14 @@ class EarningAnalytics extends Component {
                             headStyle={{height: 30, textAlign: "center"}}
                         >
                             <div  style={{width: "calc(100vw * 0.3 - 40)", height: 350}}>
-                                <MyBarChart/>
+                                <MonthlyLineChart monthDataSource={this.state.monthDataSource}  />
                             </div>
                         </Card>
                     </Col>
                     <Col offset={3}>
                         <Row>
                             <Col>
-                                <DatePicker onChange={onChange}/>
-                            </Col>
-                            <p style={{marginTop: 5, marginLeft: 13, fontWeight: 500, color: "#002233" }}>Compare to</p>
-                            <Col offset={1}>
-                                <DatePicker onChange={onChange} />
+                                <DatePicker value={moment(this.state.date, dateFormat)} onChange={this.dailyChange}/>
                             </Col>
                         </Row>
                         <Card
@@ -54,7 +96,7 @@ class EarningAnalytics extends Component {
                             // extra={ <DatePicker onChange={onChange} />}
                         >
                             <div  style={{width: "calc(100vw * 0.3 - 40)", height: 350}}>
-                                <MyBarChart/>
+                                <DailyLineChart dailyDataSource={this.state.dailyDataSource}/>
                             </div>
                         </Card>
                     </Col>
