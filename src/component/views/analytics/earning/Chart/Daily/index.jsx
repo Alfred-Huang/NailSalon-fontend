@@ -3,9 +3,6 @@ import {Bar, BarChart, CartesianGrid, Legend, Line, ResponsiveContainer, Tooltip
 
 class DailyLineChart extends Component {
 
-
-
-
     barChartDisplay = () =>{
         let data = this.props.dailyDataSource.map((item)=>({hour: item.hour, sale: parseInt(item.sale)}))
         return <ResponsiveContainer width="100%" height="100%">

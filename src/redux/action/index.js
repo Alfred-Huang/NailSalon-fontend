@@ -15,6 +15,8 @@ import {setProduct} from "./product";
 import {setSchedule} from "./schedule";
 import {searchType} from "./product"
 import {searchNumber} from "./product"
+import {setToken} from "./user";
+import  {removeToken} from "./user";
 
 export {
     setService,
@@ -33,5 +35,7 @@ export {
     setProduct,
     setEmployee,
     searchType,
-    searchNumber
+    searchNumber,
+    setToken,
+    removeToken
 };

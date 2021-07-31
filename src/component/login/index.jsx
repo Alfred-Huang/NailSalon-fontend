@@ -1,9 +1,11 @@
 import React, {Component, Fragment} from 'react';
 import {Button, Col, Row, Card, Form, Input} from "antd";
-
+import axios from "axios";
 import { Redirect, withRouter } from "react-router-dom";
 import {connect} from "react-redux";
 import './index.css'
+import server from "../../config/config";
+import {setToken} from "../../utils/auth";
 
 const layout = {
     labelCol: { span: 6 },
@@ -22,10 +24,9 @@ class Login extends Component {
     }
 
     submit = (values)=>{
-        console.log("---")
+        setToken()
         this.props.history.push('/dashboard');
-        // return <Redirect to="/dashboard"/>
-        // let api = global.AppConfig.serverIP + "/login"
+        // let api = server.IP + "/login";
         // axios.post(api, values).then(()=>{
         //
         // })
@@ -74,4 +75,7 @@ class Login extends Component {
     }
 }
 
-export default connect((state)=> state.user)(withRouter(Login));
+export default connect(
+    state=>({userInfo: state.user}),
+
+)(withRouter(Login));

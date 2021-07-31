@@ -1,5 +1,5 @@
 import React, {Component, Fragment} from 'react';
-import {Form, Input, Row, Col, Card, Button, Tag, Modal, Select, Table, InputNumber, message} from "antd";
+import {Input, Row, Col, Card, Button, Tag, Modal, message} from "antd";
 import AddingTable from "./AddingTable";
 import EditableTable from "./EditableTable"
 import server from "../../../../config/config";

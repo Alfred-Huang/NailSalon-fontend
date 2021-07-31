@@ -5,7 +5,7 @@ import server from "../../../../config/config";
 import {v4 as uuidv4} from "uuid";
 import axios from "axios";
 import {connect} from "react-redux";
-import {addEmployee, deleteEmployee, setEmployee} from "../../../../redux/action/employee";
+import {addEmployee, deleteEmployee, setEmployee} from "../../../../redux/action";
 
 class AddingEmployeeTable extends Component {
 

@@ -9,8 +9,6 @@ export const UPDATE_SERVICE = "UPDATE_SERVICE"
 export const DELETE_SERVICE = "DELETE_SERVICE"
 
 
-
-
 export const ADD_EMPLOYEE = "ADD_EMPLOYEE"
 export const SET_EMPLOYEE = "SET_EMPLOYEE"
 export const DELETE_EMPLOYEE = "DELETE_EMPLOYEE"
@@ -26,3 +24,7 @@ export const SET_PRODUCT = "SET_PRODUCT";
 export const UPDATE_PRODUCT = "UPDATE_PRODUCT";
 export const SEARCH_TYPE = "SEARCH_TYPE";
 export const SEARCH_NUMBER = "SEARCH_NUMBER";
+
+export const SET_TOKEN = "SET_TOKEN";
+export const REMOVE_TOKEN = "REMOVE_TOKEN"
+

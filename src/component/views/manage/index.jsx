@@ -1,7 +1,6 @@
 import React, {Component, Fragment} from 'react';
 import {
     Table,
-    List,
     Col,
     Card,
     Row,
@@ -9,19 +8,16 @@ import {
     Calendar,
     Space,
     Modal,
-    Form,
-    Input,
     Select,
     message
 } from "antd";
 import AddingEmployeeTable from "./AddingEmployeeTable";
-import {v4 as uuidv4} from "uuid";
-import moment from 'moment';
+
 import server from "../../../config/config";
 import axios from "axios";
 import {connect} from "react-redux";
-import {addEmployee, deleteEmployee, setEmployee} from "../../../redux/action/employee";
-import {addSchedule, deleteSchedule, setSchedule} from "../../../redux/action/schedule";
+import {addEmployee, deleteEmployee, setEmployee} from "../../../redux/action";
+import {addSchedule, deleteSchedule, setSchedule} from "../../../redux/action";
 const { Option } = Select;
 
 
@@ -45,10 +41,9 @@ class Manage extends Component {
             this.error()
         })
     }
-    handleServiceSelector = (value) =>{
-        this.setState({employeeList: value},()=>{
-            console.log(this.state.employeeList)
-        })
+
+    handleEmployeeSelector = (value) => {
+        this.setState({employeeList: value})
     }
 
     onSelect = (value) =>{
@@ -254,7 +249,7 @@ class Manage extends Component {
                                 allowClear
                                 style={{ width: '50%'}}
                                 placeholder="Please select"
-                                onChange={this.handleServiceSelector}
+                                onChange={this.handleEmployeeSelector}
                             >
                                 {employeeSelection}
                             </Select>
